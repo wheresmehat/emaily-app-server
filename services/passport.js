@@ -35,7 +35,63 @@ passport.use(
 
         }, 
         
-        (accessToken, refreshToken, profile, done) => {
+        async (accessToken, refreshToken, profile, done) => {
+
+            const existingUser = await User.findOne({ googleId: profile.id })
+               
+            if (existingUser) {
+
+                done(null, existingUser);
+            }
+            else {
+
+                const user = await new User({ googleId: profile.id }).save();
+                
+                done(null, user);
+            }
+    
+        }
+    )
+
+);
+
+
+
+
+
+/*
+
+// async with try and catch
+
+ async (accessToken, refreshToken, profile, done) => {
+
+    try {
+        const existingUser = await User.findOne({ googleId: profile.id });
+
+        if (existingUser) {
+
+            return done(null, existingUser);
+        }
+
+        const user = await new User({googleId: profile.id}).save();
+    
+        done(null, user);
+
+    } 
+    catch (error) {
+    
+        console.log('Error ' + error);
+    }
+
+}
+
+*/
+
+/*
+
+// old syntax with promises
+
+(accessToken, refreshToken, profile, done) => {
 
             User.findOne({ googleId: profile.id })
                 .then((existingUser) => {
@@ -53,6 +109,5 @@ passport.use(
 
                 })     
         }
-    )
 
-);
+*/
