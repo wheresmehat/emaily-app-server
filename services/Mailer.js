@@ -10,6 +10,8 @@ class Mailer extends helper.Mail {
 
         super();
 
+        this.sgApi = sendgrid(keys.sendGridKey);
+
         this.from_email = new helper.Email("no-reply@emaily.com");
         this.subject = subject;
         this.body = new helper.Content("text/html", content);
@@ -50,6 +52,33 @@ class Mailer extends helper.Mail {
         });
 
         this.addPersonalization(personalize);
+    }
+
+    async send() {
+
+        const request = this.sgApi.emptyRequest({
+
+            method: "POST",
+            path: "/v3/mail/send",
+            body: this.toJSON()
+
+        });
+
+        //const response = await this.sgApi.API(request);
+        //return response;
+
+        const response = await this.sgApi.API(request, (error, response) => {
+
+            if (error) {
+                console.log("Error response received");
+            }
+
+                //console.log(response.statusCode);
+                //console.log(response.body);
+                //console.log(response.headers);
+        });
+            
+        return response;
     }
 
 }
