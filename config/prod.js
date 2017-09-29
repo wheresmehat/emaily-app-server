@@ -12,7 +12,9 @@ module.exports = {
 
     stripeSecretKey: process.env.STRIPE_SECRET_KEY,
 
-    sendGridKey: process.env.SEND_GRID_KEY
+    sendGridKey: process.env.SEND_GRID_KEY,
+
+    emailTemplateDomain: process.env.EMAIL_TEMPLATE_DOMAIN
 };
 
 
