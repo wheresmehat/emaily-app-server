@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { reduxForm, Field } from "redux-form";
 import { Link } from "react-router-dom";
+import validateEmails from "../../utils/validateEmails";
 
 import SurveyField from "./SurveyField";
 
@@ -58,15 +59,20 @@ class SurveyForm extends Component {
 
 }
 
-function validate({ title, subject, body, emails }) {     // values object (same as above) destructured
+function validate(values) {     // values object (same as above) destructured
 
     const errors = {};
 
-    if (!title) {
+    errors.emails = validateEmails(values.emails || "");
 
-        errors.title = "You must provide a title";
-    }
-    console.log(errors);
+    FIELDS.forEach(({ name }) => {
+
+        if (!values[name]) {
+
+            errors[name] = `You must provide ${name === "emails" ? name : "a " + name}`;
+        }
+
+    });
     
     return errors;
 }
