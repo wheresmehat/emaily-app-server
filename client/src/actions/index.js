@@ -20,7 +20,11 @@ export const handleToken = (token) =>
         dispatch({ type: FETCH_USER, payload: res.data });
     };
 
+export const submitSurvey = (values) => {
+    console.log("submitting survey", values);
+    return { type: "submit_survey" };
 
+};
 
 
 /*
