@@ -18,31 +18,33 @@ module.exports = (app) => {
     });
 
     app.post("/api/surveys/webhooks", (req, res) => {
+
+        const p = new Path("/api/surveys/:surveyId/:choice");
         console.log("req.body", req.body);
         console.log("-----------------------");
-        const events = _.map(req.body, (event) => {
 
-            const pathName = new URL(event.url).pathname;
-            const p = new Path("/api/surveys/:surveyId/:choice");
+        const events = _.chain(req.body)
+            .map((event) => {
 
-            const match = p.test(pathName);
+                const pathName = new URL(event.url).pathname;
+            
+                const match = p.test(pathName);
 
-            if (match) {
+                if (match) {
 
-                return { 
-                    email: event.email,
-                    surveyId: match.surveyId,
-                    choice: match.choice
-                };
-            }
+                    return { 
+                        email: event.email,
+                        surveyId: match.surveyId,
+                        choice: match.choice
+                    };
+                }
 
-        });
+            })
+            .compact()
+            .uniqBy((event) => [event.email, event.surveyID].join())
+            .value();
 
-        const compactEvents = _.compact(events);
-
-        const uniqueEvents = _.uniqBy(compactEvents, (event) => [event.email, event.surveyID].join());
-
-        console.log(uniqueEvents);
+        console.log(events);
         console.log("-----------------------");
         res.send({});
 
@@ -101,5 +103,29 @@ module.exports = (app) => {
 
 
 
+/*
 
+// app.post("/api/surveys/webhooks... before _.chain
 
+const events = _.map(req.body, (event) => {
+
+            const pathName = new URL(event.url).pathname;
+        
+            const match = p.test(pathName);
+
+            if (match) {
+
+                return { 
+                    email: event.email,
+                    surveyId: match.surveyId,
+                    choice: match.choice
+                };
+            }
+
+        });
+
+        const compactEvents = _.compact(events);
+
+        const uniqueEvents = _.uniqBy(compactEvents, (event) => [event.email, event.surveyID].join());
+
+*/
