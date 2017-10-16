@@ -12,7 +12,7 @@ const Survey = mongoose.model("survey");
 
 module.exports = (app) => {
 
-    app.get("/api/surveys/thanks", (req, res) => {
+    app.get("/api/surveys/:surveyId/:choice", (req, res) => {
 
         res.send("Thanks for the feedback!");
     });
@@ -20,9 +20,7 @@ module.exports = (app) => {
     app.post("/api/surveys/webhooks", (req, res) => {
 
         const p = new Path("/api/surveys/:surveyId/:choice");
-        console.log("req.body", req.body);
-        console.log("-----------------------");
-
+    
         const events = _.chain(req.body)
             .map((event) => {
 
@@ -42,10 +40,32 @@ module.exports = (app) => {
             })
             .compact()
             .uniqBy((event) => [event.email, event.surveyID].join())
+            .each(({ surveyId, email, choice }) => {
+
+                Survey.updateOne({
+
+                    _id: surveyId,
+                    
+                    recipients: {
+
+                        $elemMatch: { email: email, responded: false }
+                    }
+                }, {
+
+                    $inc: { [choice]: 1 },
+
+                    $set: { "recipients.$.responded": true },
+
+                    lastResponded: new Date()
+
+                }).exec();
+
+            })
             .value();
 
-        console.log(events);
-        console.log("-----------------------");
+            console.log(events);
+            console.log("-----------------------------------");
+
         res.send({});
 
     });
@@ -69,7 +89,7 @@ module.exports = (app) => {
                     return true;
                 }
                 
-            }).map(email => ({ email })),
+            }).map(email => ({ email: email.trim() })),
 
             _user: req.user.id,
             dateSent: Date.now()
